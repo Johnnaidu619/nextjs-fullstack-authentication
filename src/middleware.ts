@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // List of allowed origins
-const allowedOrigins = ['*','http://localhost:59447','http://localhost:3000'];
+const allowedOrigins = ['*'];
 
 export function middleware(request: NextRequest) {
   const origin = request.headers.get('origin');
 
   // Check if the request origin is in the allowedOrigins array
-  if (origin && allowedOrigins.includes(origin)) {
+  if (origin && ( allowedOrigins.includes('*')|| allowedOrigins.includes(origin))) {
     // If this is a preflight request, respond with the necessary CORS headers
     if (request.method === 'OPTIONS') {
       const response = new NextResponse(null, { status: 204 });
