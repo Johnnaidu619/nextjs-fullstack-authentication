@@ -6,8 +6,10 @@ connect();
 
 export async function GET(request: NextRequest) {
   try {
-    const cart_products = await Cart.find();
-
+    const  userId  = request.nextUrl.searchParams.get('userId');
+    
+    const cart_products =  await Cart.findOne({ user: userId });
+    
     return NextResponse.json({
       success: true,
       data: cart_products,
