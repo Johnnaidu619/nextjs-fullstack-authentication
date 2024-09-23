@@ -4,21 +4,32 @@ import { NextRequest, NextResponse } from "next/server";
 
 connect();
 
-export async function GET(request: NextRequest, { params }: { params: { productId: string } }) {
+export async function GET(request: NextRequest) {
   try {
-     const { productId } = params;
-     const product = await Product.findById(productId);
+    const { searchParams } = new URL(request.url);
+    const productId = searchParams.get("productId");
 
-     if (!product) {
-       return NextResponse.json(
-         {
-           success: false,
-           message: "Product not found",
-         },
-         { status: 404 }
-       );
-     }
+    if (!productId) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Product ID is required",
+        },
+        { status: 400 }
+      );
+    }
 
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Product not found",
+        },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
