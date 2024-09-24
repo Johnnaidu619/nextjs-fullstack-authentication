@@ -18,9 +18,6 @@ export async function POST(request: NextRequest) {
 
     let cart = await Cart.findOne({ user: userId });
     let totalproductprice = quantity * product.price;
-    console.log(quantity);
-    console.log(product.price);
-    console.log(totalproductprice);
     if (cart) {
       const productIndex = cart.products.findIndex(
         (item:any) => item.product.toString() === ProductId && item.size === size
@@ -46,6 +43,10 @@ export async function POST(request: NextRequest) {
         totalPrice: product.price * quantity,
       });
     }
+
+    cart.products.totalproductprice=cart.products.reduce((total:any,item:any)=>{
+      return total+item.quantity*product.price;
+    })
 
     cart.totalPrice = cart.products.reduce((total:any, item:any) => {
       return total + item.quantity * product.price;
