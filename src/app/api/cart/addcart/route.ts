@@ -17,32 +17,38 @@ export async function POST(request: NextRequest) {
     }
 
     let cart = await Cart.findOne({ user: userId });
-
+    let totalproductprice = quantity * product.price;
+    console.log(quantity);
+    console.log(product.price);
+    console.log(totalproductprice);
     if (cart) {
-      // Check if the product with the specified size is already in the cart
       const productIndex = cart.products.findIndex(
         (item:any) => item.product.toString() === ProductId && item.size === size
       );
-
       if (productIndex > -1) {
         // If the product exists in the cart with the same size, update the quantity
         cart.products[productIndex].quantity = quantity;
+        cart.products[productIndex].totalproductprice = totalproductprice;
       } else {
         // If the product is not in the cart, add it
-        cart.products.push({ product: ProductId, quantity, size });
+        cart.products.push({
+          product: ProductId,
+          quantity,
+          size,
+          totalproductprice,
+        });
       }
     } else {
       // If no cart exists for the user, create a new one
       cart = new Cart({
         user: userId,
-        products: [{ product: ProductId, quantity, size }],
+        products: [{ product: ProductId, quantity, size, totalproductprice }],
         totalPrice: product.price * quantity,
       });
     }
 
-    // Calculate total price
     cart.totalPrice = cart.products.reduce((total:any, item:any) => {
-      return total + item.quantity * product.price; // Update price calculation based on quantity
+      return total + item.quantity * product.price;
     }, 0);
 
     // Save the cart
