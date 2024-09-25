@@ -9,30 +9,24 @@ export async function GET(request: NextRequest) {
   try {
     const  userId  = request.nextUrl.searchParams.get('userId');
     
-    let cart_products =  await Cart.findOne({ user: userId });
-    if (!cart_products) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "No cart found for this user.",
-        },
-        { status: 404 }
-      );
+    const cart_products =  await Cart.findOne({ user: userId });
+    let pro_cart = JSON.parse(JSON.stringify(cart_products));
+    for (const [i, car_product] of pro_cart.products.entries()) {
+      const tit_products=await Product.findById(car_product.product);
+      if (tit_products) {
+        pro_cart.products[i] = {
+          ...car_product, 
+          title: tit_products.title, 
+          image: tit_products.image, 
+        };
+      } else {
+        console.log(`Product not found for ID: ${car_product.product}`);
+      }
     }
-     const modifiedCartProducts = await Promise.all(
-       cart_products.products.map(async (cartProduct:any) => {
-         const product = await Product.findById(cartProduct.product);
-         return {
-           ...cartProduct.toObject(), 
-           title: product.title, 
-           image: product.image, 
-         };
-       })
-     );
     return NextResponse.json({
-        success: true,
-        data: modifiedCartProducts,
-      });
+      success: true,
+      data: pro_cart,
+    });
   } catch (error: any) {
     return NextResponse.json(
       {

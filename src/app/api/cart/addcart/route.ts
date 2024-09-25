@@ -1,6 +1,7 @@
 import { connect } from "@/dbConfig/dbConfig";
 import Cart from "@/models/cart";
 import Product from "@/models/products";
+import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 
 connect();
@@ -52,6 +53,31 @@ export async function POST(request: NextRequest) {
     }, 0);
 
     await cart.save();
+    return NextResponse.json({ message: "Cart updated" }, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Error occurred while updating cart" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const { ObjectId } = require("mongodb");
+    const reqBody = await request.json();
+    const { userId, cartProductId, quantity, size } = reqBody;
+
+    const user =await User.findOne({_id:new ObjectId(userId)});
+    if(!user) {
+      return NextResponse.json({error:"User not found"},{status:404})
+    }
+    const cart = await Cart.findOne({ user: userId });
+    if(!cart) {
+      return NextResponse.json({error:"Cart is empty"},{status:400})
+    }
+    console.log(cart);
     return NextResponse.json({ message: "Cart updated" }, { status: 200 });
   } catch (error) {
     console.error(error);
