@@ -20,12 +20,11 @@ export async function POST(request: NextRequest) {
     let totalproductprice = quantity * product.price;
     if (cart) {
       const productIndex = cart.products.findIndex(
-        (item:any) => item.product.toString() === ProductId && item.size === size
+        (item:any) => item.product.toString() === ProductId && item.size === Number(size)
       );
       if (productIndex > -1) {
-        // If the product exists in the cart with the same size, update the quantity
-        cart.products[productIndex].quantity = quantity;
-        cart.products[productIndex].totalproductprice = totalproductprice;
+        cart.products[productIndex].quantity += Number(quantity);
+        cart.products[productIndex].totalproductprice = cart.products[productIndex].quantity*product.price;
       } else {
         // If the product is not in the cart, add it
         cart.products.push({
@@ -52,7 +51,6 @@ export async function POST(request: NextRequest) {
       return total + item.quantity * product.price;
     }, 0);
 
-    // Save the cart
     await cart.save();
     return NextResponse.json({ message: "Cart updated" }, { status: 200 });
   } catch (error) {
