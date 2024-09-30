@@ -10,6 +10,9 @@ export async function GET(request: NextRequest) {
     const  userId  = request.nextUrl.searchParams.get('userId');
     
     const cart_products =  await Cart.findOne({ user: userId });
+    // if(!cart_products){
+    //   return NextResponse.json({error:"no items found in the cart"},{status:400})
+    // }
     let pro_cart = JSON.parse(JSON.stringify(cart_products));
     for (const [i, car_product] of pro_cart.products.entries()) {
       const tit_products=await Product.findById(car_product.product);

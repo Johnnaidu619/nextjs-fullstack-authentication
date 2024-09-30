@@ -3,6 +3,7 @@ import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import Cart from "@/models/cart";
 
 connect()
 
@@ -38,6 +39,19 @@ export async function POST(request: NextRequest){
         //create token
         const token = await jwt.sign(tokenData, process.env.TOKEN_SECRET!, {expiresIn: "1d"})
 
+        let cart = await Cart.findOne({ user: user._id });
+        if(cart){
+            console.log("cart exists for user")
+        }
+        else{
+            cart = new Cart({
+          user: user._id,
+          products: [],
+          totalPrice: 0,
+        });
+        await cart.save();
+        console.log("cart created");
+        }
         const response = NextResponse.json({
             message: "Login successful",
             success: true,

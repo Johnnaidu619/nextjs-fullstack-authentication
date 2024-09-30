@@ -67,18 +67,40 @@ export async function PATCH(request: NextRequest) {
   try {
     const { ObjectId } = require("mongodb");
     const reqBody = await request.json();
-    const { userId, cartProductId, quantity, size } = reqBody;
+    const { userId, cartProductId, quantity } = reqBody;
 
     const user =await User.findOne({_id:new ObjectId(userId)});
     if(!user) {
       return NextResponse.json({error:"User not found"},{status:404})
     }
     const cart = await Cart.findOne({ user: userId });
-    if(!cart) {
-      return NextResponse.json({error:"Cart is empty"},{status:400})
+    if (!cart) {
+      return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
-    console.log(cart);
-    return NextResponse.json({ message: "Cart updated" }, { status: 200 });
+    const productIndex = cart.products.findIndex((product:any) =>
+      product._id.equals(cartProductId)
+    );
+
+    if (productIndex === -1) {
+      return NextResponse.json(
+        { error: "Product not found in cart" },
+        { status: 404 }
+      );
+    }
+    const price =
+      cart.products[productIndex].totalproductprice /
+      cart.products[productIndex].quantity;
+    cart.products[productIndex].quantity = quantity;
+    // cart.products[productIndex].size=size;
+    cart.products[productIndex].totalproductprice=quantity*price
+
+    cart.totalPrice = cart.products.reduce(
+      (total:any, product:any) => total + product.totalproductprice,
+      0
+    );
+
+    await cart.save();
+    return NextResponse.json({ message: "Cart updated",data:cart }, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
